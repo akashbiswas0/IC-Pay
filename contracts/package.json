@@ -1,0 +1,38 @@
+{
+  "name": "@suica/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "hardhat compile && node scripts/export-abi.mjs",
+    "test": "hardhat test",
+    "deploy:testnet": "node --env-file-if-exists=../.env ../node_modules/hardhat/dist/src/cli.js run scripts/deploy.ts --network testnet",
+    "node": "hardhat node",
+    "deploy:multibaas": "node --env-file-if-exists=../.env --import tsx scripts/deploy-multibaas.ts",
+    "deploy:rewards": "node --env-file-if-exists=../.env --import tsx scripts/deploy-rewards-multibaas.ts",
+    "test:rewards:kms": "RUN_AWS_KMS_REWARDS_TEST=1 node --env-file-if-exists=../.env ../node_modules/hardhat/dist/src/cli.js test mocha test/aws-kms-rewards-live.ts",
+    "deploy:collectibles": "node --env-file-if-exists=../.env --import tsx scripts/deploy-collectibles-multibaas.ts",
+    "deploy:loyalty": "node --env-file-if-exists=../.env --import tsx scripts/deploy-loyalty-multibaas.ts"
+  },
+  "exports": {
+    "./abi/*": "./abi/*.json"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "5.6.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "4.2.0",
+    "@nomicfoundation/hardhat-ethers-chai-matchers": "3.0.11",
+    "@nomicfoundation/hardhat-mocha": "4.0.0",
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.13.6",
+    "chai": "6.2.2",
+    "ethers": "6.17.0",
+    "hardhat": "3.18.0",
+    "mocha": "12.0.2",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}

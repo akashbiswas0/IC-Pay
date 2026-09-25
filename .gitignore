@@ -1,0 +1,57 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+.firecrawl/
+.references/
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+artifacts/
+cache/
+coverage/
+*.log
+
+*.tsbuildinfo
+
+apps/ios/Config/Environment.xcconfig
+
+apps/web/qa/world-context.local.json
+
+# Local recovery journals contain signed transactions.
+contracts/deployments/*.json
+contracts/deployments/.*.lock
+
+# Local agent configuration and generated deliverables
+/.agents/
+/agent/
+/skills-lock.json
+/output/
+/docs/
+
+# Documentation, planning notes, and READMEs at any depth
+*.md
+*.mdx
+*.markdown
+[Rr][Ee][Aa][Dd][Mm][Ee]*
+
+# Keep third-party license and attribution notices
+![Ll][Ii][Cc][Ee][Nn][Ss][Ee]*
+![Cc][Oo][Pp][Yy][Rr][Ii][Gg][Hh][Tt]*
+![Nn][Oo][Tt][Ii][Cc][Ee]*
+
+# Captured QA evidence and generated test reports (not test source)
+/apps/ios/qa/
+**/qa/*.png
+**/qa/*.jpg
+**/qa/*.jpeg
+**/qa/*.webp
+**/qa/*.mp4
+playwright-report/
+test-results/
+*.xcresult/
+*.xcarchive/
+*.ipa

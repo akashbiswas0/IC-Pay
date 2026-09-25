@@ -1,0 +1,12 @@
+node_modules
+.references
+agent
+.agents
+.claude
+contracts/artifacts
+contracts/cache
+contracts/abi
+apps/*/dist
+apps/ios
+skills-lock.json
+Project.md

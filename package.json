@@ -1,0 +1,34 @@
+{
+  "name": "suica-linked-payments",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "contracts"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev": "node scripts/dev.mjs",
+    "dev:worker": "npm run worker -w apps/api",
+    "db:migrate": "npm run migrate -w apps/api",
+    "check:config": "node scripts/check-config.mjs",
+    "format": "prettier --write apps/web/src apps/api/src apps/api/test scripts",
+    "format:check": "prettier --check apps/web/src apps/api/src apps/api/test scripts",
+    "test:kms:live": "tsx apps/api/scripts/kms-smoke.ts",
+    "serve:app": "node scripts/serve-app.mjs",
+    "test:world:live": "tsx apps/web/scripts/check-world-session.ts && node apps/web/scripts/run-world-session-check.mjs",
+    "build:world:native": "bash scripts/build-world-native.sh",
+    "test:world:native": "node scripts/qa/run-native-world.mjs"
+  },
+  "engines": {
+    "node": ">=22.16"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0",
+    "prettier": "^3.9.9"
+  }
+}

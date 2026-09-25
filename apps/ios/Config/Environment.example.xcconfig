@@ -1,0 +1,7 @@
+// Copy to Environment.xcconfig and supply your actual HTTPS deployment.
+// $() prevents xcconfig from interpreting // as a comment.
+SUICA_API_BASE_URL = https:/$()/api.example.com
+SUICA_WEB_BASE_URL = https:/$()/app.example.com
+
+// Optional: one explicitly trusted former API deployment of the SAME backend.
+// SUICA_PREVIOUS_API_BASE_URL = https:/$()/previous-api.example.com
