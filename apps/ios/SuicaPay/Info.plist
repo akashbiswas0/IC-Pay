@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>SUICA_API_BASE_URL</key><string>$(SUICA_API_BASE_URL)</string>
+<key>SUICA_WEB_BASE_URL</key><string>$(SUICA_WEB_BASE_URL)</string>
+<key>SUICA_PREVIOUS_API_BASE_URL</key><string>$(SUICA_PREVIOUS_API_BASE_URL)</string>
+<key>CFBundleDisplayName</key><string>IC Pay</string>
+<key>CFBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+<key>CFBundleExecutable</key><string>$(EXECUTABLE_NAME)</string>
+<key>CFBundleName</key><string>$(PRODUCT_NAME)</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>1.0</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleURLTypes</key><array><dict><key>CFBundleURLName</key><string>app.suicapay.connect</string><key>CFBundleURLSchemes</key><array><string>suicapay</string></array></dict></array>
+<key>LSRequiresIPhoneOS</key><true/>
+<key>NFCReaderUsageDescription</key><string>Read your physical Suica to link your card or collect a payment you authorized.</string>
+<key>com.apple.developer.nfc.readersession.felica.systemcodes</key><array><string>0003</string></array>
+<key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/></dict>
+<key>UILaunchScreen</key><dict/>
+<key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
+</dict></plist>

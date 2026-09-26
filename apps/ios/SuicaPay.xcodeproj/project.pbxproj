@@ -1,0 +1,706 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1108A48EDA2DBD30886DC5CC /* LoyaltyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CDB8665296E2D303B87EDD1 /* LoyaltyTests.swift */; };
+		12D0816F77BC2DC871C5298F /* NativeWorldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42ACEA0E68604431273A274D /* NativeWorldTests.swift */; };
+		12D7398EC592207800E67A1A /* NativeWorldSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45331A6270CC3D4AC9AFFEC8 /* NativeWorldSession.swift */; };
+		208E92369FA6B151335FFEA9 /* SpendingPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6770EC86D8014D9445FBD68C /* SpendingPersistenceTests.swift */; };
+		2523A4F5168189A9EE53B2FE /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 487859C6C0B79CAB397D559D /* APIClient.swift */; };
+		352C4C50D3C898383C341AC8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B01A66A573B35082E9153AC2 /* Assets.xcassets */; };
+		359E66B0D1FC6699165B7CD2 /* WorldHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7168A059865986EDBDEE5B0 /* WorldHandoff.swift */; };
+		378DA0B3395D53EACCC93E36 /* InvoiceCreationPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057D8F96F4C635EDDBE61377 /* InvoiceCreationPlanTests.swift */; };
+		3BC01E516A69586A3DD0206E /* SuicaPayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA02054B5CFDE28352B51412 /* SuicaPayApp.swift */; };
+		3BC44BC02A046C8FA25D5FED /* WalletAvailabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7C63DF0D854AA421A264A47 /* WalletAvailabilityTests.swift */; };
+		43FD5B2D39C298928C1EAEE7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E53864F4C950F61CAE49C51 /* Foundation.framework */; };
+		472EFF04D9C3C3281780963C /* RewardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B694EE901B2FE82346C4A3 /* RewardsView.swift */; };
+		49BDD9E34925284C4B880A69 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B136A49A8AEE02AD0442BF26 /* AppStore.swift */; };
+		57CECAEE04D02A5E0AFA3902 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D210FCEF12B2329BCDAA10 /* Models.swift */; };
+		58EACAAF15380168FCC75290 /* MerchantOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8594A4CB07531AE4E684D2DF /* MerchantOnboardingView.swift */; };
+		619AFB5EE63F39803F2CBA29 /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2579432C7F8391200D84A2A /* AppStateTests.swift */; };
+		6D4C62C8D16270C79FB6A247 /* ProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82534335F7E268D15452B1E4 /* ProtocolTests.swift */; };
+		7B1F85F0D8FCF941CABF915A /* FeedbackViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5306E233319D4F9DBA4A60EE /* FeedbackViews.swift */; };
+		85313F46E92D2BBC3E1A40DD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E53864F4C950F61CAE49C51 /* Foundation.framework */; };
+		875224016209ABC0ED5D007A /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8561EEA3F7C16BA6E666985E /* AccountView.swift */; };
+		89735C7117095A0E2EC423DC /* LoyaltyReadOnlyDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFD0AB50CB03BA6176A86CE /* LoyaltyReadOnlyDeviceTests.swift */; };
+		993B229BA84AF0621C5B9F0E /* SpendingForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5C07196C03159C6FDB95AB /* SpendingForm.swift */; };
+		9BE91D345923096C300263D4 /* DeviceSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDF06E92D6CC8083EF458D4 /* DeviceSecurity.swift */; };
+		A22433D564A9F12C8A042BD7 /* LoyaltyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3350721303D317398BD1EC9E /* LoyaltyView.swift */; };
+		A92417320C6E9F341A2E4772 /* InvoiceCreationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC93D2FCD8594EDF8F8CEB83 /* InvoiceCreationPlan.swift */; };
+		ABE17785449634AAF6BC0718 /* RewardsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C332C07B2D7BF57012F0B52 /* RewardsModels.swift */; };
+		BC72094CAA64CB3618675BD5 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C857A4797F5EEC23EF70440 /* OnboardingView.swift */; };
+		C3ED50EEB94ACF1430F25259 /* SpendingFormTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60CA397FFDDBF6492D228C9D /* SpendingFormTests.swift */; };
+		C464F4E548932F13CD50472A /* LiveMerchantCheckoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18359CAE2AAC9B4FEB10B6F6 /* LiveMerchantCheckoutTests.swift */; };
+		D1471D1C5FC5872FB77F7B50 /* IDKit in Frameworks */ = {isa = PBXBuildFile; productRef = 29CEC537705BAE9ECA531260 /* IDKit */; };
+		D1DBC1A624F6F0A6656BAF24 /* PaymentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA4BD40D97DEBC71B9ECBC /* PaymentsView.swift */; };
+		DD6D32FD53AE76EFF115D8A3 /* CardReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10EA822A6F6AF13EF586B56 /* CardReader.swift */; };
+		E3A104069CDBDB92BA38B54D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E53864F4C950F61CAE49C51 /* Foundation.framework */; };
+		E925FA2D67BD2C1E0B99251D /* BuildConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C9989F7DB7D9F7E5900965 /* BuildConfiguration.swift */; };
+		F01E0FD4FBD8465934FAB2DB /* LoyaltyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDF3EA2728BFC6AF0D51E01 /* LoyaltyModels.swift */; };
+		F2FF08C3F870BB6A7258CAEC /* RewardProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3113E9AA33A036406ABBE73 /* RewardProtocolTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2E1C543309C37D5B4F5115AB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4EF0BE20E8B860225BBD231 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 09FB238B91E74AD49F5F3D2A;
+			remoteInfo = SuicaPay;
+		};
+		34A96D04F104A8A9857C1279 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4EF0BE20E8B860225BBD231 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 09FB238B91E74AD49F5F3D2A;
+			remoteInfo = SuicaPay;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		057D8F96F4C635EDDBE61377 /* InvoiceCreationPlanTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InvoiceCreationPlanTests.swift; sourceTree = "<group>"; };
+		18359CAE2AAC9B4FEB10B6F6 /* LiveMerchantCheckoutTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveMerchantCheckoutTests.swift; sourceTree = "<group>"; };
+		2E53864F4C950F61CAE49C51 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		3350721303D317398BD1EC9E /* LoyaltyView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoyaltyView.swift; sourceTree = "<group>"; };
+		35CA4BD40D97DEBC71B9ECBC /* PaymentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PaymentsView.swift; sourceTree = "<group>"; };
+		37D210FCEF12B2329BCDAA10 /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		3C857A4797F5EEC23EF70440 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		42ACEA0E68604431273A274D /* NativeWorldTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeWorldTests.swift; sourceTree = "<group>"; };
+		45331A6270CC3D4AC9AFFEC8 /* NativeWorldSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NativeWorldSession.swift; sourceTree = "<group>"; };
+		487859C6C0B79CAB397D559D /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		4A5C07196C03159C6FDB95AB /* SpendingForm.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpendingForm.swift; sourceTree = "<group>"; };
+		5306E233319D4F9DBA4A60EE /* FeedbackViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackViews.swift; sourceTree = "<group>"; };
+		60CA397FFDDBF6492D228C9D /* SpendingFormTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpendingFormTests.swift; sourceTree = "<group>"; };
+		6770EC86D8014D9445FBD68C /* SpendingPersistenceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SpendingPersistenceTests.swift; sourceTree = "<group>"; };
+		76B694EE901B2FE82346C4A3 /* RewardsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RewardsView.swift; sourceTree = "<group>"; };
+		7D850D6DD1F608DE46E9195A /* Environment.example.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Environment.example.xcconfig; sourceTree = "<group>"; };
+		82534335F7E268D15452B1E4 /* ProtocolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProtocolTests.swift; sourceTree = "<group>"; };
+		8561EEA3F7C16BA6E666985E /* AccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		8594A4CB07531AE4E684D2DF /* MerchantOnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MerchantOnboardingView.swift; sourceTree = "<group>"; };
+		8BFD0AB50CB03BA6176A86CE /* LoyaltyReadOnlyDeviceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoyaltyReadOnlyDeviceTests.swift; sourceTree = "<group>"; };
+		8C332C07B2D7BF57012F0B52 /* RewardsModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RewardsModels.swift; sourceTree = "<group>"; };
+		8D0145BB8FE7183F587E9EA2 /* SuicaPay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SuicaPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9475905112E41E19360B21D3 /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		9CDB8665296E2D303B87EDD1 /* LoyaltyTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoyaltyTests.swift; sourceTree = "<group>"; };
+		A0395D94F82A3D0B4640B7AF /* SuicaPayTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SuicaPayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3113E9AA33A036406ABBE73 /* RewardProtocolTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RewardProtocolTests.swift; sourceTree = "<group>"; };
+		B01A66A573B35082E9153AC2 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B136A49A8AEE02AD0442BF26 /* AppStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		B2C9989F7DB7D9F7E5900965 /* BuildConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BuildConfiguration.swift; sourceTree = "<group>"; };
+		B7168A059865986EDBDEE5B0 /* WorldHandoff.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldHandoff.swift; sourceTree = "<group>"; };
+		C6E4A3882102C0490F9E6154 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C7C63DF0D854AA421A264A47 /* WalletAvailabilityTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WalletAvailabilityTests.swift; sourceTree = "<group>"; };
+		CC93D2FCD8594EDF8F8CEB83 /* InvoiceCreationPlan.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InvoiceCreationPlan.swift; sourceTree = "<group>"; };
+		D10EA822A6F6AF13EF586B56 /* CardReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardReader.swift; sourceTree = "<group>"; };
+		D2579432C7F8391200D84A2A /* AppStateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		DA02054B5CFDE28352B51412 /* SuicaPayApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SuicaPayApp.swift; sourceTree = "<group>"; };
+		DEDF3EA2728BFC6AF0D51E01 /* LoyaltyModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoyaltyModels.swift; sourceTree = "<group>"; };
+		EA88556CB3CE4BF1F1106862 /* SuicaPayUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SuicaPayUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED44729B2D1D554764B1226B /* SuicaPay.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = SuicaPay.entitlements; sourceTree = "<group>"; };
+		FBDF06E92D6CC8083EF458D4 /* DeviceSecurity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeviceSecurity.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10D143A54A74474BE1D88F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85313F46E92D2BBC3E1A40DD /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C04CCDD2F21BFCE7CCF5741B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E3A104069CDBDB92BA38B54D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C64A7D679B37A0AD5E7E3080 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43FD5B2D39C298928C1EAEE7 /* Foundation.framework in Frameworks */,
+				D1471D1C5FC5872FB77F7B50 /* IDKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		09904E94813E2331614E3E4A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8490A8321B38BC2CD728B6F0 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1BCF32FFEF28C696EA5310F2 = {
+			isa = PBXGroup;
+			children = (
+				A1F436AA4EDB0DD272390D29 /* Products */,
+				09904E94813E2331614E3E4A /* Frameworks */,
+				9F33AA906FE8B7C8BCDF0805 /* SuicaPay */,
+				899B9B8A291C6EE115FBC98A /* Config */,
+				FA2FCF92A5F533E2FC8F0359 /* SuicaPayTests */,
+				4E1BDA045086396719DFE6EA /* SuicaPayUITests */,
+			);
+			sourceTree = "<group>";
+		};
+		4E1BDA045086396719DFE6EA /* SuicaPayUITests */ = {
+			isa = PBXGroup;
+			children = (
+				6770EC86D8014D9445FBD68C /* SpendingPersistenceTests.swift */,
+				8BFD0AB50CB03BA6176A86CE /* LoyaltyReadOnlyDeviceTests.swift */,
+				18359CAE2AAC9B4FEB10B6F6 /* LiveMerchantCheckoutTests.swift */,
+			);
+			name = SuicaPayUITests;
+			path = SuicaPayUITests;
+			sourceTree = "<group>";
+		};
+		8490A8321B38BC2CD728B6F0 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				2E53864F4C950F61CAE49C51 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		899B9B8A291C6EE115FBC98A /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9475905112E41E19360B21D3 /* Base.xcconfig */,
+				7D850D6DD1F608DE46E9195A /* Environment.example.xcconfig */,
+			);
+			name = Config;
+			path = Config;
+			sourceTree = "<group>";
+		};
+		9F33AA906FE8B7C8BCDF0805 /* SuicaPay */ = {
+			isa = PBXGroup;
+			children = (
+				487859C6C0B79CAB397D559D /* APIClient.swift */,
+				8561EEA3F7C16BA6E666985E /* AccountView.swift */,
+				B136A49A8AEE02AD0442BF26 /* AppStore.swift */,
+				B2C9989F7DB7D9F7E5900965 /* BuildConfiguration.swift */,
+				D10EA822A6F6AF13EF586B56 /* CardReader.swift */,
+				FBDF06E92D6CC8083EF458D4 /* DeviceSecurity.swift */,
+				5306E233319D4F9DBA4A60EE /* FeedbackViews.swift */,
+				CC93D2FCD8594EDF8F8CEB83 /* InvoiceCreationPlan.swift */,
+				8594A4CB07531AE4E684D2DF /* MerchantOnboardingView.swift */,
+				37D210FCEF12B2329BCDAA10 /* Models.swift */,
+				45331A6270CC3D4AC9AFFEC8 /* NativeWorldSession.swift */,
+				3C857A4797F5EEC23EF70440 /* OnboardingView.swift */,
+				35CA4BD40D97DEBC71B9ECBC /* PaymentsView.swift */,
+				8C332C07B2D7BF57012F0B52 /* RewardsModels.swift */,
+				76B694EE901B2FE82346C4A3 /* RewardsView.swift */,
+				4A5C07196C03159C6FDB95AB /* SpendingForm.swift */,
+				DA02054B5CFDE28352B51412 /* SuicaPayApp.swift */,
+				B7168A059865986EDBDEE5B0 /* WorldHandoff.swift */,
+				B01A66A573B35082E9153AC2 /* Assets.xcassets */,
+				C6E4A3882102C0490F9E6154 /* Info.plist */,
+				ED44729B2D1D554764B1226B /* SuicaPay.entitlements */,
+				DEDF3EA2728BFC6AF0D51E01 /* LoyaltyModels.swift */,
+				3350721303D317398BD1EC9E /* LoyaltyView.swift */,
+			);
+			name = SuicaPay;
+			path = SuicaPay;
+			sourceTree = "<group>";
+		};
+		A1F436AA4EDB0DD272390D29 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D0145BB8FE7183F587E9EA2 /* SuicaPay.app */,
+				A0395D94F82A3D0B4640B7AF /* SuicaPayTests.xctest */,
+				EA88556CB3CE4BF1F1106862 /* SuicaPayUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FA2FCF92A5F533E2FC8F0359 /* SuicaPayTests */ = {
+			isa = PBXGroup;
+			children = (
+				D2579432C7F8391200D84A2A /* AppStateTests.swift */,
+				057D8F96F4C635EDDBE61377 /* InvoiceCreationPlanTests.swift */,
+				42ACEA0E68604431273A274D /* NativeWorldTests.swift */,
+				82534335F7E268D15452B1E4 /* ProtocolTests.swift */,
+				A3113E9AA33A036406ABBE73 /* RewardProtocolTests.swift */,
+				60CA397FFDDBF6492D228C9D /* SpendingFormTests.swift */,
+				C7C63DF0D854AA421A264A47 /* WalletAvailabilityTests.swift */,
+				9CDB8665296E2D303B87EDD1 /* LoyaltyTests.swift */,
+			);
+			name = SuicaPayTests;
+			path = SuicaPayTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		09FB238B91E74AD49F5F3D2A /* SuicaPay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1632A74D9AEDFCEB1CF6CE8 /* Build configuration list for PBXNativeTarget "SuicaPay" */;
+			buildPhases = (
+				6F86E2533A52F8ECA652568B /* Sources */,
+				C64A7D679B37A0AD5E7E3080 /* Frameworks */,
+				E79D7CA6393663BF3E411A1F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SuicaPay;
+			packageProductDependencies = (
+				29CEC537705BAE9ECA531260 /* IDKit */,
+			);
+			productName = SuicaPay;
+			productReference = 8D0145BB8FE7183F587E9EA2 /* SuicaPay.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A9067AF0F8584E086A374F7A /* SuicaPayTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31FDD2EEAE96CE611CFDEBDF /* Build configuration list for PBXNativeTarget "SuicaPayTests" */;
+			buildPhases = (
+				71F9067D3DF43ABB7D666928 /* Sources */,
+				C04CCDD2F21BFCE7CCF5741B /* Frameworks */,
+				A9C01A937DA5B96AED3F5D96 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4329511E14F23862CF579D09 /* PBXTargetDependency */,
+			);
+			name = SuicaPayTests;
+			productName = SuicaPayTests;
+			productReference = A0395D94F82A3D0B4640B7AF /* SuicaPayTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F5DF5CAA8E9D30FC7692A29C /* SuicaPayUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDFA05E722AD43F2F879296C /* Build configuration list for PBXNativeTarget "SuicaPayUITests" */;
+			buildPhases = (
+				390E508A7FA9DEF044D760F4 /* Sources */,
+				A10D143A54A74474BE1D88F5 /* Frameworks */,
+				BAC82002C55A3ACF15068F70 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E55DA62358273D359E619410 /* PBXTargetDependency */,
+			);
+			name = SuicaPayUITests;
+			productName = SuicaPayUITests;
+			productReference = EA88556CB3CE4BF1F1106862 /* SuicaPayUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F4EF0BE20E8B860225BBD231 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 383F2B20EF8771B23DF264ED /* Build configuration list for PBXProject "SuicaPay" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1BCF32FFEF28C696EA5310F2;
+			minimizedProjectReferenceProxies = 0;
+			packageReferences = (
+				A7E35267C1112B0A9D037786 /* XCLocalSwiftPackageReference "IDKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A1F436AA4EDB0DD272390D29 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				09FB238B91E74AD49F5F3D2A /* SuicaPay */,
+				A9067AF0F8584E086A374F7A /* SuicaPayTests */,
+				F5DF5CAA8E9D30FC7692A29C /* SuicaPayUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A9C01A937DA5B96AED3F5D96 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BAC82002C55A3ACF15068F70 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E79D7CA6393663BF3E411A1F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				352C4C50D3C898383C341AC8 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		390E508A7FA9DEF044D760F4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				208E92369FA6B151335FFEA9 /* SpendingPersistenceTests.swift in Sources */,
+				89735C7117095A0E2EC423DC /* LoyaltyReadOnlyDeviceTests.swift in Sources */,
+				C464F4E548932F13CD50472A /* LiveMerchantCheckoutTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6F86E2533A52F8ECA652568B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2523A4F5168189A9EE53B2FE /* APIClient.swift in Sources */,
+				875224016209ABC0ED5D007A /* AccountView.swift in Sources */,
+				49BDD9E34925284C4B880A69 /* AppStore.swift in Sources */,
+				E925FA2D67BD2C1E0B99251D /* BuildConfiguration.swift in Sources */,
+				DD6D32FD53AE76EFF115D8A3 /* CardReader.swift in Sources */,
+				9BE91D345923096C300263D4 /* DeviceSecurity.swift in Sources */,
+				7B1F85F0D8FCF941CABF915A /* FeedbackViews.swift in Sources */,
+				A92417320C6E9F341A2E4772 /* InvoiceCreationPlan.swift in Sources */,
+				58EACAAF15380168FCC75290 /* MerchantOnboardingView.swift in Sources */,
+				57CECAEE04D02A5E0AFA3902 /* Models.swift in Sources */,
+				12D7398EC592207800E67A1A /* NativeWorldSession.swift in Sources */,
+				BC72094CAA64CB3618675BD5 /* OnboardingView.swift in Sources */,
+				D1DBC1A624F6F0A6656BAF24 /* PaymentsView.swift in Sources */,
+				ABE17785449634AAF6BC0718 /* RewardsModels.swift in Sources */,
+				472EFF04D9C3C3281780963C /* RewardsView.swift in Sources */,
+				993B229BA84AF0621C5B9F0E /* SpendingForm.swift in Sources */,
+				3BC01E516A69586A3DD0206E /* SuicaPayApp.swift in Sources */,
+				359E66B0D1FC6699165B7CD2 /* WorldHandoff.swift in Sources */,
+				F01E0FD4FBD8465934FAB2DB /* LoyaltyModels.swift in Sources */,
+				A22433D564A9F12C8A042BD7 /* LoyaltyView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71F9067D3DF43ABB7D666928 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				619AFB5EE63F39803F2CBA29 /* AppStateTests.swift in Sources */,
+				378DA0B3395D53EACCC93E36 /* InvoiceCreationPlanTests.swift in Sources */,
+				12D0816F77BC2DC871C5298F /* NativeWorldTests.swift in Sources */,
+				6D4C62C8D16270C79FB6A247 /* ProtocolTests.swift in Sources */,
+				F2FF08C3F870BB6A7258CAEC /* RewardProtocolTests.swift in Sources */,
+				C3ED50EEB94ACF1430F25259 /* SpendingFormTests.swift in Sources */,
+				3BC44BC02A046C8FA25D5FED /* WalletAvailabilityTests.swift in Sources */,
+				1108A48EDA2DBD30886DC5CC /* LoyaltyTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4329511E14F23862CF579D09 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SuicaPay;
+			target = 09FB238B91E74AD49F5F3D2A /* SuicaPay */;
+			targetProxy = 34A96D04F104A8A9857C1279 /* PBXContainerItemProxy */;
+		};
+		E55DA62358273D359E619410 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SuicaPay;
+			target = 09FB238B91E74AD49F5F3D2A /* SuicaPay */;
+			targetProxy = 2E1C543309C37D5B4F5115AB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		04C572613903EB0388FC74A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = SuicaPay;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0D7838C9AD4C5F307422FBD5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SuicaPay.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SuicaPay";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2EB038BBA48819A8859AAE64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9475905112E41E19360B21D3 /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = SuicaPay/SuicaPay.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				INFOPLIST_FILE = SuicaPay/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		77394A99B558D64E1FA16959 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SuicaPay.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SuicaPay";
+			};
+			name = Debug;
+		};
+		7A7D142CB8270A4750D59B11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9BF9F8CC710442F3131877D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = SuicaPay;
+			};
+			name = Debug;
+		};
+		ACF36D5A7D5A6C9B34DD2AE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9475905112E41E19360B21D3 /* Base.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = SuicaPay/SuicaPay.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3GV5LC5UDM;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				INFOPLIST_FILE = SuicaPay/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = app.suicapay.demo;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E876FFC7FC4DC025BFE8D006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		31FDD2EEAE96CE611CFDEBDF /* Build configuration list for PBXNativeTarget "SuicaPayTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D7838C9AD4C5F307422FBD5 /* Release */,
+				77394A99B558D64E1FA16959 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		383F2B20EF8771B23DF264ED /* Build configuration list for PBXProject "SuicaPay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E876FFC7FC4DC025BFE8D006 /* Debug */,
+				7A7D142CB8270A4750D59B11 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1632A74D9AEDFCEB1CF6CE8 /* Build configuration list for PBXNativeTarget "SuicaPay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ACF36D5A7D5A6C9B34DD2AE0 /* Release */,
+				2EB038BBA48819A8859AAE64 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CDFA05E722AD43F2F879296C /* Build configuration list for PBXNativeTarget "SuicaPayUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04C572613903EB0388FC74A0 /* Release */,
+				9BF9F8CC710442F3131877D7 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A7E35267C1112B0A9D037786 /* XCLocalSwiftPackageReference "IDKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Vendor/IDKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		29CEC537705BAE9ECA531260 /* IDKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = IDKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F4EF0BE20E8B860225BBD231 /* Project object */;
+}
