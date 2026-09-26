@@ -1,0 +1,1 @@
+../../SuicaPay/LoyaltyModels.swift

@@ -1,0 +1,1 @@
+../../SuicaPay/RewardsModels.swift

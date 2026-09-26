@@ -1,0 +1,1 @@
+../../SuicaPayTests/RewardProtocolTests.swift

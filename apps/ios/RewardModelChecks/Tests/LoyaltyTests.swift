@@ -1,0 +1,1 @@
+../../SuicaPayTests/LoyaltyTests.swift
