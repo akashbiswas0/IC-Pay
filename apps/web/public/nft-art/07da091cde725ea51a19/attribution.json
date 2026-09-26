@@ -1,0 +1,46 @@
+{
+  "version": "07da091cde725ea51a19",
+  "baseURL": "https://main.d21bivg674x6ke.amplifyapp.com/nft-art/07da091cde725ea51a19/",
+  "directory": "apps/web/public/nft-art/07da091cde725ea51a19",
+  "institution": "The Metropolitan Museum of Art",
+  "license": "Public domain; Met Open Access CC0",
+  "licenseURL": "https://www.metmuseum.org/policies/image-resources",
+  "artworks": [
+    {
+      "index": 0,
+      "title": "Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)",
+      "artist": "Katsushika Hokusai",
+      "date": "ca. 1830–32",
+      "source": "https://www.metmuseum.org/art/collection/search/45434",
+      "apiSource": "https://collectionapi.metmuseum.org/public/collection/v1/objects/45434",
+      "imageSource": "https://images.metmuseum.org/CRDImages/as/web-large/DP130155.jpg",
+      "publicDomain": true,
+      "creditLine": "H. O. Havemeyer Collection, Bequest of Mrs. H. O. Havemeyer, 1929",
+      "sha256": "b76ccf0710b8e4b32e778a45e5398a0cf4777994523116f994a0430f4ee6a841"
+    },
+    {
+      "index": 1,
+      "title": "South Wind, Clear Sky (Gaifū kaisei), also known as Red Fuji, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)",
+      "artist": "Katsushika Hokusai",
+      "date": "ca. 1830–32",
+      "source": "https://www.metmuseum.org/art/collection/search/36490",
+      "apiSource": "https://collectionapi.metmuseum.org/public/collection/v1/objects/36490",
+      "imageSource": "https://images.metmuseum.org/CRDImages/as/web-large/DP141062.jpg",
+      "publicDomain": true,
+      "creditLine": "Rogers Fund, 1914",
+      "sha256": "681728adc3d32bb3cd106b789b16b4ce8aca6c52d511afb74174021c0228017c"
+    },
+    {
+      "index": 2,
+      "title": "Ancient Plum Tree in Bloom",
+      "artist": "Katsushika Hokusai",
+      "date": "ca. 1800",
+      "source": "https://www.metmuseum.org/art/collection/search/54315",
+      "apiSource": "https://collectionapi.metmuseum.org/public/collection/v1/objects/54315",
+      "imageSource": "https://images.metmuseum.org/CRDImages/as/web-large/DP146854.jpg",
+      "publicDomain": true,
+      "creditLine": "Gift of Estate of Samuel Isham, 1914",
+      "sha256": "ac8ca6c31021d77137812ae811f369f9a7665dd8eaa015cfef26d36b0b0f7922"
+    }
+  ]
+}
