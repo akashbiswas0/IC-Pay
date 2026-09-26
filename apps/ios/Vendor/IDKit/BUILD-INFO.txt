@@ -1,0 +1,12 @@
+Source: https://github.com/worldcoin/idkit.git
+Commit: 16bc527f52ec297a041fed9debfa6d17dea5ed28
+Build identifier: source-built-16bc527f52ec297a041fed9debfa6d17dea5ed28
+rustc 1.95.0 (59807616e 2026-04-14)
+Xcode 27.0
+Build version 27A266a
+Upstream locked inputs:
+1cf4483a034784acc9e027c7d3955854a36b5ca16f351bc8070fb91d00755b06  Cargo.lock
+2413779614fe55716d380f9e570efb9e729df846c31a18adb03529f6ec88fb23  rust/core/src/types.rs
+921cb2feaa09c22330bd488b925fe693f37254cf2c68aa9c93684e0699835e27  swift/Sources/IDKit/IDKit.swift
+Generated Swift:
+bb2e83f20bc45eb3e99ee8ea6a1645f52e3f04dfbc8aaba7b399fcb5bd0f8291  Sources/IDKit/Generated/idkit_core.swift

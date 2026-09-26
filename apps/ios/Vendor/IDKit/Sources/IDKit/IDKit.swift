@@ -1,0 +1,683 @@
+import Foundation
+
+private let sdkPackageName = "idkit_swift"
+
+public typealias IDKitResult = IdKitResult
+
+/// Typed projection of the bridge request payload, exposed for building test fixtures.
+public typealias BridgeRequestPayload = BridgeRequestPayloadWrapper
+/// Protocol-level proof request inside a ``BridgeRequestPayload``.
+public typealias ProofRequest = ProofRequestWrapper
+/// A per-credential request line item inside a ``ProofRequest``.
+public typealias CredentialRequestItem = CredentialRequestWrapper
+
+/// Configuration for uniqueness proof requests.
+public struct IDKitRequestConfig {
+    public let appId: String
+    public let action: String
+    public let rpContext: RpContext
+    public let actionDescription: String?
+    public let bridgeUrl: String?
+    public let allowLegacyProofs: Bool
+    public let requireUserPresence: Bool
+    public let overrideConnectBaseUrl: String?
+    public let returnTo: String?
+    public let environment: Environment?
+    public let connectUrlMode: ConnectUrlMode?
+
+    public init(
+        appId: String,
+        action: String,
+        rpContext: RpContext,
+        actionDescription: String? = nil,
+        bridgeUrl: String? = nil,
+        allowLegacyProofs: Bool = false,
+        requireUserPresence: Bool = false,
+        overrideConnectBaseUrl: String? = nil,
+        returnTo: String? = nil,
+        environment: Environment? = nil,
+        connectUrlMode: ConnectUrlMode? = nil
+    ) {
+        self.appId = appId
+        self.action = action
+        self.rpContext = rpContext
+        self.actionDescription = actionDescription
+        self.bridgeUrl = bridgeUrl
+        self.allowLegacyProofs = allowLegacyProofs
+        self.requireUserPresence = requireUserPresence
+        self.overrideConnectBaseUrl = overrideConnectBaseUrl
+        self.returnTo = returnTo
+        self.environment = environment
+        self.connectUrlMode = connectUrlMode
+    }
+
+    fileprivate var native: IdKitRequestConfig {
+        IdKitRequestConfig(
+            appId: appId,
+            packageName: sdkPackageName,
+            packageVersion: IDKit.version,
+            action: action,
+            rpContext: rpContext,
+            actionDescription: actionDescription,
+            bridgeUrl: bridgeUrl,
+            allowLegacyProofs: allowLegacyProofs,
+            requireUserPresence: requireUserPresence,
+            overrideConnectBaseUrl: overrideConnectBaseUrl,
+            returnTo: returnTo,
+            environment: environment,
+            connectUrlMode: connectUrlMode
+        )
+    }
+}
+
+/// Configuration for session requests.
+public struct IDKitSessionConfig {
+    public let appId: String
+    public let rpContext: RpContext
+    public let actionDescription: String?
+    public let bridgeUrl: String?
+    public let requireUserPresence: Bool
+    public let overrideConnectBaseUrl: String?
+    public let returnTo: String?
+    public let environment: Environment?
+
+    public init(
+        appId: String,
+        rpContext: RpContext,
+        actionDescription: String? = nil,
+        bridgeUrl: String? = nil,
+        requireUserPresence: Bool = false,
+        overrideConnectBaseUrl: String? = nil,
+        returnTo: String? = nil,
+        environment: Environment? = nil
+    ) {
+        self.appId = appId
+        self.rpContext = rpContext
+        self.actionDescription = actionDescription
+        self.bridgeUrl = bridgeUrl
+        self.requireUserPresence = requireUserPresence
+        self.overrideConnectBaseUrl = overrideConnectBaseUrl
+        self.returnTo = returnTo
+        self.environment = environment
+    }
+
+    fileprivate var native: IdKitSessionConfig {
+        IdKitSessionConfig(
+            appId: appId,
+            packageName: sdkPackageName,
+            packageVersion: IDKit.version,
+            rpContext: rpContext,
+            actionDescription: actionDescription,
+            bridgeUrl: bridgeUrl,
+            requireUserPresence: requireUserPresence,
+            overrideConnectBaseUrl: overrideConnectBaseUrl,
+            returnTo: returnTo,
+            environment: environment
+        )
+    }
+}
+
+/// Main entry point for IDKit Swift SDK.
+public enum IDKit {
+    public static let version = "4.0.11"
+
+    /// Creates a builder for uniqueness proof requests.
+    public static func request(config: IDKitRequestConfig) -> IDKitBuilder {
+        IDKitBuilder(inner: IdKitBuilder.fromRequest(config: config.native))
+    }
+
+    /// Builds the bridge request payload from a preset without opening a network
+    /// connection. Intended for building test fixtures.
+    public static func createBridgePayloadFromPresets(
+        config: IDKitRequestConfig, preset: Preset
+    ) throws -> BridgeRequestPayload {
+        try IdKitBuilder.fromRequest(config: config.native)
+            .bridgeRequestPayloadFromPreset(preset: preset)
+    }
+
+    /// Builds the bridge request payload from custom constraints without opening a
+    /// network connection. Intended for building test fixtures.
+    public static func createBridgePayloadFromConstraints(
+        config: IDKitRequestConfig, constraints: ConstraintNode
+    ) throws -> BridgeRequestPayload {
+        try IdKitBuilder.fromRequest(config: config.native)
+            .bridgeRequestPayload(constraints: constraints)
+    }
+
+    // TODO: Re-enable when World ID 4.0 is live
+    // /// Creates a builder for creating a new session.
+    // public static func createSession(config: IDKitSessionConfig) -> IDKitBuilder {
+    //     IDKitBuilder(inner: IdKitBuilder.fromCreateSession(config: config.native))
+    // }
+
+    // /// Creates a builder for proving an existing session.
+    // public static func proveSession(sessionId: String, config: IDKitSessionConfig) -> IDKitBuilder {
+    //     IDKitBuilder(inner: IdKitBuilder.fromProveSession(sessionId: sessionId, config: config.native))
+    // }
+
+    /// Hashes a string signal to the canonical 0x-prefixed field element string.
+    public static func hashSignal(_ signal: String) -> String {
+        hashSignalFfi(signal: Signal.fromString(s: signal))
+    }
+
+    /// Hashes raw signal bytes to the canonical 0x-prefixed field element string.
+    public static func hashSignal(_ signal: Data) -> String {
+        hashSignalFfi(signal: Signal.fromBytes(bytes: signal))
+    }
+}
+
+/// Builder wrapper that returns canonical `IDKitRequest` values.
+public final class IDKitBuilder {
+    private let inner: IdKitBuilder
+
+    fileprivate init(inner: IdKitBuilder) {
+        self.inner = inner
+    }
+
+    public func constraints(_ constraints: ConstraintNode) throws -> IDKitRequest {
+        let request = try inner.constraints(constraints: constraints)
+        return try IDKitRequest(inner: request)
+    }
+
+    // TODO: Re-enable when World ID 4.0 is live
+    // public func constraintsWithInviteCode(_ constraints: ConstraintNode) throws -> IDKitInviteCodeRequest {
+    //     let request = try inner.constraintsWithInviteCode(constraints: constraints)
+    //     return try IDKitInviteCodeRequest(inner: request)
+    // }
+
+    public func preset(_ preset: Preset) throws -> IDKitRequest {
+        let request = try inner.preset(preset: preset)
+        return try IDKitRequest(inner: request)
+    }
+
+    /// Builds the request in invite-code mode.
+    ///
+    /// Returns an `IDKitInviteCodeRequest` exposing the canonical 6-character
+    /// invite code (no separator), expiry, and the same poll-status surface
+    /// as `IDKitRequest`.
+    public func presetWithInviteCode(_ preset: Preset) throws -> IDKitInviteCodeRequest {
+        let request = try inner.presetWithInviteCode(preset: preset)
+        return try IDKitInviteCodeRequest(inner: request)
+    }
+}
+
+/// One-shot polling status returned by `IDKitRequest.pollStatusOnce()`.
+public enum IDKitStatus: Equatable {
+    case waitingForConnection
+    case awaitingConfirmation
+    case confirmed(IDKitResult)
+    case failed(IDKitErrorCode)
+    case networkingError(IDKitErrorCode)
+}
+
+/// Result returned by `IDKitRequest.pollUntilCompletion(options:)`.
+public enum IDKitCompletionResult: Equatable {
+    case success(IDKitResult)
+    case failure(IDKitErrorCode)
+}
+
+/// Polling options for `pollUntilCompletion`.
+public struct IDKitPollOptions: Equatable {
+    public var pollIntervalMs: UInt64
+    public var timeoutMs: UInt64
+
+    public init(pollIntervalMs: UInt64 = 1_000, timeoutMs: UInt64 = 900_000) {
+        self.pollIntervalMs = pollIntervalMs
+        self.timeoutMs = timeoutMs
+    }
+}
+
+/// Canonical error codes exposed by the Swift API.
+///
+/// World App errors mirror JS `IDKitErrorCodes` naming and values.
+/// `timeout` and `cancelled` are client-side errors.
+public enum IDKitErrorCode: String, Equatable {
+    case userRejected = "user_rejected"
+    case verificationRejected = "verification_rejected"
+    case credentialUnavailable = "credential_unavailable"
+    case featureUnavailable = "feature_unavailable"
+    case worldId4NotAvailable = "world_id_4_not_available"
+    case worldId3NotAvailable = "world_id_3_not_available"
+    case malformedRequest = "malformed_request"
+    case invalidNetwork = "invalid_network"
+    case inclusionProofPending = "inclusion_proof_pending"
+    case inclusionProofFailed = "inclusion_proof_failed"
+    case unexpectedResponse = "unexpected_response"
+    case connectionFailed = "connection_failed"
+    case maxVerificationsReached = "max_verifications_reached"
+    case failedByHostApp = "failed_by_host_app"
+    case userPresenceFailed = "user_presence_failed"
+    case invalidRpSignature = "invalid_rp_signature"
+    case nullifierReplayed = "nullifier_replayed"
+    case duplicateNonce = "duplicate_nonce"
+    case unknownRp = "unknown_rp"
+    case inactiveRp = "inactive_rp"
+    case timestampTooOld = "timestamp_too_old"
+    case timestampTooFarInFuture = "timestamp_too_far_in_future"
+    case invalidTimestamp = "invalid_timestamp"
+    case rpSignatureExpired = "rp_signature_expired"
+    case identityAttributesNotMatched = "identity_attributes_not_matched"
+    case genericError = "generic_error"
+    case timeout = "timeout"
+    case cancelled = "cancelled"
+
+    static func from(appError: AppError) -> Self {
+        switch appError {
+        case .userRejected:
+            .userRejected
+        case .verificationRejected:
+            .verificationRejected
+        case .credentialUnavailable:
+            .credentialUnavailable
+        case .featureUnavailable:
+            .featureUnavailable
+        case .worldId4NotAvailable:
+            .worldId4NotAvailable
+        case .worldId3NotAvailable:
+            .worldId3NotAvailable
+        case .malformedRequest:
+            .malformedRequest
+        case .invalidNetwork:
+            .invalidNetwork
+        case .inclusionProofPending:
+            .inclusionProofPending
+        case .inclusionProofFailed:
+            .inclusionProofFailed
+        case .unexpectedResponse:
+            .unexpectedResponse
+        case .connectionFailed:
+            .connectionFailed
+        case .maxVerificationsReached:
+            .maxVerificationsReached
+        case .failedByHostApp:
+            .failedByHostApp
+        case .userPresenceFailed:
+            .userPresenceFailed
+        case .invalidRpSignature:
+            .invalidRpSignature
+        case .nullifierReplayed:
+            .nullifierReplayed
+        case .duplicateNonce:
+            .duplicateNonce
+        case .unknownRp:
+            .unknownRp
+        case .inactiveRp:
+            .inactiveRp
+        case .timestampTooOld:
+            .timestampTooOld
+        case .timestampTooFarInFuture:
+            .timestampTooFarInFuture
+        case .invalidTimestamp:
+            .invalidTimestamp
+        case .rpSignatureExpired:
+            .rpSignatureExpired
+        case .identityAttributesNotMatched:
+            .identityAttributesNotMatched
+        case .genericError:
+            .genericError
+        }
+    }
+}
+
+/// Client-side errors raised while constructing canonical wrappers.
+public enum IDKitClientError: Error, LocalizedError {
+    case invalidConnectorURL(String)
+    case invalidRequestID(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidConnectorURL(let value):
+            return "Invalid connector URL: \(value)"
+        case .invalidRequestID(let value):
+            return "Invalid request ID: \(value)"
+        }
+    }
+}
+
+/// Canonical request wrapper.
+public final class IDKitRequest {
+    public let connectorURL: URL
+    /// Bridge-assigned UUID v4 for the URL/QR flow.
+    ///
+    /// Invite-code mode uses opaque hex identifiers that are not UUIDs and is
+    /// exposed via `IDKitInviteCodeRequest.requestID: String` — the typed
+    /// `UUID` here is preserved on this wrapper so existing URL/QR adopters
+    /// keep their source contract.
+    public let requestID: UUID
+
+    private let pollOnceImpl: @Sendable () async -> IDKitStatus
+
+    fileprivate init(inner: IdKitRequestWrapper) throws {
+        let rawURL = inner.connectUrl()
+        guard let connectorURL = URL(string: rawURL) else {
+            throw IDKitClientError.invalidConnectorURL(rawURL)
+        }
+
+        let rawRequestID = inner.requestId()
+        guard let requestID = UUID(uuidString: rawRequestID) else {
+            throw IDKitClientError.invalidRequestID(rawRequestID)
+        }
+
+        self.connectorURL = connectorURL
+        self.requestID = requestID
+        self.pollOnceImpl = {
+            Self.mapStatus(inner.pollStatusOnce())
+        }
+    }
+
+    // Internal initializer for deterministic polling tests.
+    init(connectorURL: URL, requestID: UUID, pollOnce: @escaping @Sendable () async -> IDKitStatus) {
+        self.connectorURL = connectorURL
+        self.requestID = requestID
+        self.pollOnceImpl = pollOnce
+    }
+
+    /// Polls the request exactly once.
+    public func pollStatusOnce() async -> IDKitStatus {
+        await pollOnceImpl()
+    }
+
+    /// Polls repeatedly until a terminal result, timeout, or cancellation.
+    public func pollUntilCompletion(options: IDKitPollOptions = IDKitPollOptions()) async -> IDKitCompletionResult {
+        await idkitPollUntilCompletion(options: options, pollOnce: pollOnceImpl)
+    }
+
+    static func mapStatus(_ status: StatusWrapper) -> IDKitStatus {
+        switch status {
+        case .waitingForConnection:
+            .waitingForConnection
+        case .awaitingConfirmation:
+            .awaitingConfirmation
+        case .confirmed(let result):
+            .confirmed(result)
+        case .failed(let error):
+            .failed(IDKitErrorCode.from(appError: error))
+        case .networkingError(let error):
+            .networkingError(IDKitErrorCode.from(appError: error))
+        }
+    }
+}
+
+/// Shared poll loop used by both `IDKitRequest` and `IDKitInviteCodeRequest`.
+@Sendable
+private func idkitPollUntilCompletion(
+    options: IDKitPollOptions,
+    pollOnce: @Sendable () async -> IDKitStatus
+) async -> IDKitCompletionResult {
+    let pollIntervalMs = max(options.pollIntervalMs, 1)
+    let startTime = Date()
+
+    while true {
+        if Task.isCancelled {
+            return .failure(.cancelled)
+        }
+
+        let elapsedMs = Date().timeIntervalSince(startTime) * 1_000
+        if elapsedMs >= Double(options.timeoutMs) {
+            return .failure(.timeout)
+        }
+
+        let status = await pollOnce()
+        switch status {
+        case .confirmed(let result):
+            return .success(result)
+        case .failed(let error):
+            return .failure(error)
+        case .waitingForConnection, .awaitingConfirmation, .networkingError:
+            break
+        }
+
+        do {
+            try await Task.sleep(nanoseconds: pollIntervalMs * 1_000_000)
+        } catch {
+            return .failure(.cancelled)
+        }
+    }
+}
+
+/// Canonical invite-code request wrapper.
+///
+/// Sibling to `IDKitRequest` for the invite-code flow. The connector URL has
+/// the same shape as URL/QR mode plus `&c=<canonical_code>&a=<app_id>`; the
+/// `world.org/verify` landing page reads those params and renders an
+/// invite-code-aware view. The poll surface mirrors `IDKitRequest`.
+public final class IDKitInviteCodeRequest {
+    public let connectorURL: URL
+    public let expiresAt: Date
+    /// Bridge-assigned request identifier. In invite-code mode this is the
+    /// lowercase-hex `HKDF(C, "dx")` the SDK derived from the code, not a
+    /// UUID — exposed as `String`.
+    public let requestID: String
+
+    private let pollOnceImpl: @Sendable () async -> IDKitStatus
+
+    fileprivate init(inner: IdKitInviteCodeRequest) throws {
+        let rawURL = inner.connectUrl()
+        guard let connectorURL = URL(string: rawURL) else {
+            throw IDKitClientError.invalidConnectorURL(rawURL)
+        }
+        self.connectorURL = connectorURL
+        self.expiresAt = Date(timeIntervalSince1970: TimeInterval(inner.expiresAt()))
+        self.requestID = inner.requestId()
+        self.pollOnceImpl = {
+            IDKitRequest.mapStatus(inner.pollStatusOnce())
+        }
+    }
+
+    // Internal initializer for deterministic polling tests.
+    init(connectorURL: URL, expiresAt: Date, requestID: String, pollOnce: @escaping @Sendable () async -> IDKitStatus) {
+        self.connectorURL = connectorURL
+        self.expiresAt = expiresAt
+        self.requestID = requestID
+        self.pollOnceImpl = pollOnce
+    }
+
+    /// Polls the request exactly once.
+    public func pollStatusOnce() async -> IDKitStatus {
+        await pollOnceImpl()
+    }
+
+    /// Polls repeatedly until a terminal result, timeout, or cancellation.
+    public func pollUntilCompletion(options: IDKitPollOptions = IDKitPollOptions()) async -> IDKitCompletionResult {
+        await idkitPollUntilCompletion(options: options, pollOnce: pollOnceImpl)
+    }
+}
+
+// TODO: Re-enable when World ID 4.0 is live
+// public struct CredentialRequestOptions: Equatable {
+//     public var signal: String?
+//     public var genesisIssuedAtMin: UInt64?
+//     public var expiresAtMin: UInt64?
+//
+//     public init(
+//         signal: String? = nil,
+//         genesisIssuedAtMin: UInt64? = nil,
+//         expiresAtMin: UInt64? = nil
+//     ) {
+//         self.signal = signal
+//         self.genesisIssuedAtMin = genesisIssuedAtMin
+//         self.expiresAtMin = expiresAtMin
+//     }
+// }
+
+// public extension CredentialRequest {
+//     /// Creates a `CredentialRequest` with optional string signal.
+//     static func create(_ type: CredentialType, signal: String? = nil) -> CredentialRequest {
+//         CredentialRequest.withStringSignal(credentialType: type, signal: signal)
+//     }
+//
+//     /// Creates a `CredentialRequest` with options parity with JS core:
+//     /// `signal`, `genesis_issued_at_min`, and `expires_at_min`.
+//     static func create(_ type: CredentialType, options: CredentialRequestOptions) throws -> CredentialRequest {
+//         if options.genesisIssuedAtMin == nil, options.expiresAtMin == nil {
+//             return CredentialRequest.withStringSignal(credentialType: type, signal: options.signal)
+//         }
+//
+//         let payload = CredentialRequestJSON(
+//             type: type.requestType,
+//             signal: options.signal,
+//             genesisIssuedAtMin: options.genesisIssuedAtMin,
+//             expiresAtMin: options.expiresAtMin
+//         )
+//         let encoded = try JSONEncoder().encode(payload)
+//         let json = String(decoding: encoded, as: UTF8.self)
+//         return try CredentialRequest.fromJson(json: json)
+//     }
+// }
+
+// public func anyOf(_ items: CredentialRequest...) -> ConstraintNode {
+//     ConstraintNode.any(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func anyOf(_ items: [CredentialRequest]) -> ConstraintNode {
+//     ConstraintNode.any(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func anyOf(nodes: ConstraintNode...) -> ConstraintNode {
+//     ConstraintNode.any(nodes: nodes)
+// }
+
+// public func anyOf(nodes: [ConstraintNode]) -> ConstraintNode {
+//     ConstraintNode.any(nodes: nodes)
+// }
+
+// public func allOf(_ items: CredentialRequest...) -> ConstraintNode {
+//     ConstraintNode.all(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func allOf(_ items: [CredentialRequest]) -> ConstraintNode {
+//     ConstraintNode.all(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func allOf(nodes: ConstraintNode...) -> ConstraintNode {
+//     ConstraintNode.all(nodes: nodes)
+// }
+
+// public func allOf(nodes: [ConstraintNode]) -> ConstraintNode {
+//     ConstraintNode.all(nodes: nodes)
+// }
+
+// public func enumerateOf(_ items: CredentialRequest...) -> ConstraintNode {
+//     enumerateOf(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func enumerateOf(_ items: [CredentialRequest]) -> ConstraintNode {
+//     enumerateOf(nodes: items.map { ConstraintNode.item(request: $0) })
+// }
+
+// public func enumerateOf(nodes: ConstraintNode...) -> ConstraintNode {
+//     enumerateOf(nodes: nodes)
+// }
+
+// public func enumerateOf(nodes: [ConstraintNode]) -> ConstraintNode {
+//     do {
+//         let nodesJson = try nodes.map { try $0.toJson() }.joined(separator: ",")
+//         return try ConstraintNode.fromJson(json: #"{"enumerate":[\#(nodesJson)]}"#)
+//     } catch {
+//         preconditionFailure("Failed to build enumerate constraint: \(error)")
+//     }
+// }
+
+/// Returns the orb legacy preset.
+///
+/// This preset only returns World ID 3.0 proofs. Use it for compatibility with older IDKit versions.
+public func orbLegacy(signal: String? = nil) -> Preset {
+    .orbLegacy(signal: signal)
+}
+
+/// Returns the secure document legacy preset.
+///
+/// This preset only returns World ID 3.0 proofs. Use it for compatibility with older IDKit versions.
+public func secureDocumentLegacy(signal: String? = nil) -> Preset {
+    .secureDocumentLegacy(signal: signal)
+}
+
+/// Returns the document legacy preset.
+///
+/// This preset only returns World ID 3.0 proofs. Use it for compatibility with older IDKit versions.
+public func documentLegacy(signal: String? = nil) -> Preset {
+    .documentLegacy(signal: signal)
+}
+
+/// Returns the device legacy preset.
+///
+/// This preset only returns World ID 3.0 proofs. Use it for compatibility with older IDKit versions.
+public func deviceLegacy(signal: String? = nil) -> Preset {
+    .deviceLegacy(signal: signal)
+}
+
+/// Returns the selfie check legacy preset.
+///
+/// This preset only returns World ID 3.0 proofs. Use it for compatibility with older IDKit versions.
+/// Preview: Selfie Check is currently in preview. Contact us if you need it enabled.
+public func selfieCheckLegacy(signal: String? = nil) -> Preset {
+    .selfieCheckLegacy(signal: signal)
+}
+
+/// Creates a `SelfieCheck` preset.
+///
+/// The preset requests the Selfie Check credential and always disables fallback to legacy proofs.
+public func selfieCheck(signal: String? = nil) -> Preset {
+    .selfieCheck(signal: signal)
+}
+
+/// Returns the identity check preset.
+public func identityCheck(attributes: [IdentityAttribute], legacySignal: String? = nil) -> Preset {
+    .identityCheck(attributes: attributes, legacySignal: legacySignal)
+}
+
+// TODO: Re-enable when World ID 4.0 is live
+// private struct CredentialRequestJSON: Encodable {
+//     let type: String
+//     let signal: String?
+//     let genesisIssuedAtMin: UInt64?
+//     let expiresAtMin: UInt64?
+//
+//     enum CodingKeys: String, CodingKey {
+//         case type
+//         case signal
+//         case genesisIssuedAtMin = "genesis_issued_at_min"
+//         case expiresAtMin = "expires_at_min"
+//     }
+// }
+
+// private extension CredentialType {
+//     var requestType: String {
+//         switch self {
+//         case .orb:
+//             return "orb"
+//         case .face:
+//             return "face"
+//         case .secureDocument:
+//             return "secure_document"
+//         case .document:
+//             return "document"
+//         case .device:
+//             return "device"
+//         }
+//     }
+// }
+
+public extension Signal {
+    var bytesData: Data {
+        Data(self.asBytes())
+    }
+
+    var stringValue: String? {
+        self.asString()
+    }
+}
+
+extension ProofRequest {
+    /// Credential identifiers from `proofRequests` (e.g. `["passport", "mnc"]`).
+    public var credentialIdentifiers: [String] {
+        proofRequests.map(\.identifier)
+    }
+}
+
+extension BridgeRequestPayload {
+    /// Credential identifiers when a v4 `proofRequest` is present; empty otherwise.
+    public var credentialIdentifiers: [String] {
+        proofRequest?.credentialIdentifiers ?? []
+    }
+}
