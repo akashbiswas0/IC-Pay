@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><title>World session SDK check</title></head><body><h1>Real World session request</h1><p>This developer check creates a signed request. It does not enroll a card or complete a proof.</p><button id="start">Create session request</button><pre id="result">Not started</pre><script type="module">
+import { createSelfieSession } from '/src/world-session.ts';
+async function run() {
+  const output = document.querySelector('#result'); output.textContent = 'Creating';
+  document.querySelector('#start').disabled = true;
+  try {
+    const response = await fetch('/qa/world-context.local.json', {cache:'no-store'});
+    if(!response.ok) throw new Error('Generate a fresh local RP context first.');
+    const config = await response.json();
+    const flow = await createSelfieSession(config);
+    const url = new URL(flow.connectorURI);
+    if(url.protocol !== 'https:' || !flow.requestId) throw new Error('No valid World connector returned.');
+    output.textContent = JSON.stringify({result:'passed',requestCreated:true,credential:'selfie',connectorHost:url.hostname,proofCompleted:false});
+  } catch(error) { output.textContent = JSON.stringify({result:'failed',message:error.message}); }
+}
+document.querySelector('#start').onclick = run;
+if (new URLSearchParams(location.search).get('run') === '1') void run();
+</script></body></html>

@@ -1,0 +1,14 @@
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {CollectibleCard} from '../../apps/web/src/Rewards';
+import {rewardActivity} from '../../apps/web/src/reward-state';
+import type {Config,Reward} from '../../apps/web/src/api';
+const snapshot=readFileSync('.build/cloud/collectible-read-check-logs.jsonl','utf8').trim().split('\n').map(line=>JSON.parse(line)).find(r=>r.source==='live-operator-wallet');
+if(!snapshot?.items?.length)throw Error('No real on-chain collectible snapshot');
+const reward:Reward=snapshot.items[0];
+if(reward.status!=='used'||reward.remainingCredit!=='0'||reward.nftOwned!==true||reward.events?.length!==3)throw Error('Live lifecycle proof is incomplete');
+const config:Config={chainId:'11155111',token:{address:'0x9191e7d4aed20411b2b068f43e40bd325e5ede0e',symbol:'MJPY',decimals:18},explorerUrl:'https://sepolia.etherscan.io',world:{appId:'',environment:'production'},capabilities:{payments:true,world:true,rewards:true,collectibles:true}};
+const markup=renderToStaticMarkup(<main className="qa-collection"><p className="field-hint">Live protocol verification · issuer wallet</p><h1>Collectible after redemption</h1><p>This is the NFT created and redeemed by the infrastructure-only Sepolia test. It is not a customer balance or a seeded reward.</p><div className="collectible-grid"><CollectibleCard reward={reward} config={config}/></div><h2>Confirmed activity</h2>{rewardActivity([reward]).map(e=><p key={e.id}>{e.label} · {e.amount ? (BigInt(e.amount)/10n**18n).toString()+' MJPY' : ''}<br/><a href={e.url??undefined}>{e.date}</a></p>)}</main>);
+mkdirSync('.build/collectibles-ui',{recursive:true,mode:0o700});
+const css=readFileSync('apps/web/src/styles.css','utf8');writeFileSync('.build/collectibles-ui/live.html',`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Live collectible verification</title><style>${css}\n.qa-collection{max-width:640px;margin:32px auto;padding:0 24px 32px}.qa-collection>p{line-height:1.6}.qa-collection h1{font-size:1.8rem}.qa-collection h2{margin-top:32px}</style>${markup}</html>`,{mode:0o600});console.log('Rendered the actual confirmed issuer NFT and its three receipt events.');
