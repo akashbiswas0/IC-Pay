@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS dependencies
+WORKDIR /workspace
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
+COPY contracts/package.json ./contracts/package.json
+RUN npm ci --workspace=apps/api --include-workspace-root=false --ignore-scripts
+
+FROM dependencies AS build
+COPY apps/api/tsconfig.json ./apps/api/tsconfig.json
+COPY apps/api/src ./apps/api/src
+RUN npm run build --workspace=apps/api
+
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS database-tools
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client-15
+
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS runtime
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3001 DATABASE_SSL_CA_FILE=/app/certs/global-bundle.pem
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libpq5 liblz4-1 libzstd1 zlib1g \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=database-tools /usr/lib/postgresql/15/bin/pg_restore /usr/local/bin/pg_restore
+RUN pg_restore --version
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
+COPY contracts/package.json ./contracts/package.json
+RUN npm ci --omit=dev --workspace=apps/api --include-workspace-root=false --ignore-scripts \
+    && npm cache clean --force
+COPY --from=build --chown=node:node /workspace/apps/api/dist ./apps/api/dist
+COPY --chown=node:node apps/api/migrations ./apps/api/migrations
+COPY --chown=node:node apps/api/certs/global-bundle.pem ./certs/global-bundle.pem
+COPY --chown=node:node scripts/cloud/*.mjs ./scripts/cloud/
+WORKDIR /app/apps/api
+USER node
+EXPOSE 3001
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["node", "dist/bootstrap.js"]
+CMD ["api"]

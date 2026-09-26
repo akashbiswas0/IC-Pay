@@ -1,0 +1,22 @@
+# Explicit build-context allowlist: no .env, credentials, dumps, generated work or app user data.
+**
+!Dockerfile.api
+!package.json
+!package-lock.json
+!apps/
+!apps/api/
+!apps/api/package.json
+!apps/api/tsconfig.json
+!apps/api/src/
+!apps/api/src/**
+!apps/api/migrations/
+!apps/api/migrations/**
+!apps/api/certs/
+!apps/api/certs/global-bundle.pem
+!apps/web/
+!apps/web/package.json
+!contracts/
+!contracts/package.json
+!scripts/
+!scripts/cloud/
+!scripts/cloud/*.mjs

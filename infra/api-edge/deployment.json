@@ -1,0 +1,16 @@
+{
+  "functionName": "suica-pay-api-edge",
+  "functionArn": "arn:aws:lambda:us-east-1:150911080841:function:suica-pay-api-edge",
+  "roleArn": "arn:aws:iam::150911080841:role/suica-pay-api-edge-role",
+  "runtime": "nodejs22.x",
+  "architecture": "arm64",
+  "timeout": 30,
+  "memory": 256,
+  "codeSha256": "ZwlsBxNJe9G7vty4ZOyLK18dzMgOWGu8BtttcaWQakw=",
+  "lastModified": "2026-09-26T03:03:43.644+0000",
+  "region": "us-east-1",
+  "functionUrl": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/",
+  "upstreamOrigin": "https://senior-train-gracious.ngrok-free.dev",
+  "authType": "NONE",
+  "purpose": "API edge to the development backend running on the Mac; not a hosted database or full backend migration"
+}

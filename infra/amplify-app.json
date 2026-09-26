@@ -1,0 +1,26 @@
+{
+  "name": "suica-pay",
+  "description": "Suica Pay customer application and World verification handoff",
+  "platform": "WEB",
+  "customRules": [
+    {
+      "source": "/v1/<*>",
+      "target": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/v1/<*>",
+      "status": "200"
+    },
+    {
+      "source": "/health",
+      "target": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/health",
+      "status": "200"
+    },
+    {
+      "source": "/verify",
+      "target": "/index.html",
+      "status": "200"
+    }
+  ],
+  "customHeaders": "customHeaders:\n  - pattern: '**/*'\n    headers:\n      - key: X-Content-Type-Options\n        value: nosniff\n      - key: Referrer-Policy\n        value: no-referrer\n      - key: X-Frame-Options\n        value: DENY\n  - pattern: '/v1/*'\n    headers:\n      - key: Cache-Control\n        value: private, no-store\n  - pattern: '/verify'\n    headers:\n      - key: Cache-Control\n        value: no-store\n",
+  "tags": {
+    "Project": "suica-pay"
+  }
+}

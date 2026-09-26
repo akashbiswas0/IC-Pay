@@ -1,0 +1,15 @@
+{
+  "region": "us-east-1",
+  "frontend": {
+    "appId": "d21bivg674x6ke",
+    "branch": "main",
+    "origin": "https://main.d21bivg674x6ke.amplifyapp.com",
+    "deploymentJobId": "1"
+  },
+  "apiEdge": {
+    "functionName": "suica-pay-api-edge",
+    "functionUrl": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/"
+  },
+  "developmentUpstream": "https://senior-train-gracious.ngrok-free.dev",
+  "backendAndDatabaseStillOnMac": true
+}

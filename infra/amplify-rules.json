@@ -1,0 +1,17 @@
+[
+  {
+    "source": "/v1/<*>",
+    "target": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/v1/<*>",
+    "status": "200"
+  },
+  {
+    "source": "/health",
+    "target": "https://qkfurqarktgautktc7ynax3toi0gcyxd.lambda-url.us-east-1.on.aws/health",
+    "status": "200"
+  },
+  {
+    "source": "/verify",
+    "target": "/index.html",
+    "status": "200"
+  }
+]

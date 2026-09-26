@@ -1,0 +1,1366 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Suica Pay managed API and worker on on-demand Fargate with private encrypted PostgreSQL;
+  existing VPC and edge Lambda retained.
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-068092c62ad659401
+  PublicSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-0e2f06fd11628f8f6,subnet-09045931cd077fb33
+    Description: At least two existing IGW-routed subnets in different AZs. Lambda and RDS remain
+      private despite these subnet routes.
+  ImageUri:
+    Type: String
+    Description: Linux x86_64 API image URI; use an immutable digest for cutover. Desired counts
+      must remain zero while using a placeholder.
+  EcrRepositoryArn:
+    Type: String
+    Default: arn:aws:ecr:us-east-1:150911080841:repository/suica-pay-api
+  RuntimeSecretArn:
+    Type: String
+    Description: Existing Secrets Manager secret containing flat string application environment
+      JSON.
+  DatabaseAppSecretArn:
+    Type: String
+    Description: Existing application DB secret JSON with username/password; never the RDS master
+      secret.
+  ApiDesiredCount:
+    Type: Number
+    Default: 0
+    AllowedValues:
+    - 0
+    - 1
+    - 2
+  WorkerDesiredCount:
+    Type: Number
+    Default: 0
+    AllowedValues:
+    - 0
+    - 1
+  DatabaseName:
+    Type: String
+    Default: suicapay
+    AllowedPattern: '[a-z][a-z0-9_]{0,62}'
+  DatabaseInstanceClass:
+    Type: String
+    Default: db.t4g.micro
+    AllowedValues:
+    - db.t4g.micro
+    - db.t4g.small
+  DatabaseEngineVersion:
+    Type: String
+    Default: '16.15'
+    AllowedPattern: 16\.[0-9]+
+  TaskCpu:
+    Type: String
+    Default: '256'
+    AllowedValues:
+    - '256'
+  TaskMemory:
+    Type: String
+    Default: '512'
+    AllowedValues:
+    - '512'
+    - '1024'
+  MigrationBucketName:
+    Type: String
+    Default: ''
+    Description: Optional existing bucket containing the migration dump; role gets only this
+      prefix.
+  MigrationObjectPrefix:
+    Type: String
+    Default: suica-pay/migration/
+    AllowedPattern: '[A-Za-z0-9/_-]+/'
+  SecretsKmsKeyArn:
+    Type: String
+    Default: ''
+    Description: Optional customer-managed key used to encrypt runtime/app secrets. Leave empty
+      for AWS-managed Secrets Manager keys.
+  TokenDisplayName:
+    Type: String
+    Default: IC Stablecoin
+  TokenDisplaySymbol:
+    Type: String
+    Default: icUSD
+  TokenOnchainSymbol:
+    Type: String
+    Default: MJPY
+  TestFundingEnabled:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+    Description: Enable one-time verified-customer Sepolia MJPY grants.
+  TestFundingDailyLimit:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 1000
+    Description: Maximum account grants reserved per UTC day.
+  LoyaltyPaymentAddress:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^0x[0-9a-f]{40}$
+  LoyaltyPaymentContract:
+    Type: String
+    Default: loyaltypoints
+    AllowedPattern: ^[a-z][a-z0-9]*$
+  CollectiblePaymentAddress:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^0x[0-9a-f]{40}$
+  CollectiblePaymentContract:
+    Type: String
+    Default: collectiblerewards
+  CollectibleArtworkBaseUrl:
+    Type: String
+    Default: ''
+    Description: Trusted HTTPS content-addressed NFT artwork directory.
+Conditions:
+  HasMigrationBucket:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: MigrationBucketName
+      - ''
+  HasSecretsKmsKey:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: SecretsKmsKeyArn
+      - ''
+Resources:
+  EdgeLambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: Dedicated existing-edge Lambda network identity
+      SecurityGroupEgress:
+      - IpProtocol: '-1'
+        CidrIp: 127.0.0.1/32
+        Description: Suppress default all-destinations egress; functional rules are separate
+          resources.
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: Private ALB accepts only the dedicated edge Lambda
+      SecurityGroupEgress:
+      - IpProtocol: '-1'
+        CidrIp: 127.0.0.1/32
+        Description: Suppress default all-destinations egress; functional rules are separate
+          resources.
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  TaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: API and worker task network identity
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+        Description: Outbound HTTPS for AWS APIs, World, MultiBaas and RPC services.
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: Private PostgreSQL accepts only application and migration tasks
+      SecurityGroupEgress:
+      - IpProtocol: '-1'
+        CidrIp: 127.0.0.1/32
+        Description: Suppress default all-destinations egress; functional rules are separate
+          resources.
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  EdgeToLoadBalancer:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Ref: EdgeLambdaSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      DestinationSecurityGroupId:
+        Ref: LoadBalancerSecurityGroup
+  LoadBalancerFromEdge:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Ref: LoadBalancerSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId:
+        Ref: EdgeLambdaSecurityGroup
+  LoadBalancerToApi:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Ref: LoadBalancerSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3001
+      ToPort: 3001
+      DestinationSecurityGroupId:
+        Ref: TaskSecurityGroup
+  TasksFromLoadBalancer:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Ref: TaskSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3001
+      ToPort: 3001
+      SourceSecurityGroupId:
+        Ref: LoadBalancerSecurityGroup
+  TasksToPostgres:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Ref: TaskSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      DestinationSecurityGroupId:
+        Ref: DatabaseSecurityGroup
+  PostgresFromTasks:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Ref: DatabaseSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId:
+        Ref: TaskSecurityGroup
+  DatabaseSubnets:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Existing subnets; DB has no public IP and only task-SG access.
+      SubnetIds:
+        Ref: PublicSubnetIds
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  DatabaseParameters:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Family: postgres16
+      Description: Require TLS for application PostgreSQL connections.
+      Parameters:
+        rds.force_ssl: '1'
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: postgres
+      EngineVersion:
+        Ref: DatabaseEngineVersion
+      DBInstanceClass:
+        Ref: DatabaseInstanceClass
+      DBName:
+        Ref: DatabaseName
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
+      AllocatedStorage: '20'
+      StorageType: gp3
+      StorageEncrypted: true
+      PubliclyAccessible: false
+      MultiAZ: false
+      BackupRetentionPeriod: 7
+      DeletionProtection: true
+      CopyTagsToSnapshot: true
+      AutoMinorVersionUpgrade: true
+      AllowMajorVersionUpgrade: false
+      DBSubnetGroupName:
+        Ref: DatabaseSubnets
+      DBParameterGroupName:
+        Ref: DatabaseParameters
+      VPCSecurityGroups:
+      - Ref: DatabaseSecurityGroup
+      EnableCloudwatchLogsExports:
+      - postgresql
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  ApiLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName:
+        Fn::Sub: /suica-pay/${AWS::StackName}/api
+      RetentionInDays: 14
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  WorkerLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName:
+        Fn::Sub: /suica-pay/${AWS::StackName}/worker
+      RetentionInDays: 14
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  MigrationLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName:
+        Fn::Sub: /suica-pay/${AWS::StackName}/migration
+      RetentionInDays: 14
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  TaskEventLogs:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName:
+        Fn::Sub: /suica-pay/${AWS::StackName}/task-events
+      RetentionInDays: 14
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              aws:SourceAccount:
+                Ref: AWS::AccountId
+            ArnLike:
+              aws:SourceArn:
+                Fn::Sub: arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:*
+      Policies:
+      - PolicyName: ScopedApplicationAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: ecr:GetAuthorizationToken
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - ecr:BatchCheckLayerAvailability
+            - ecr:GetDownloadUrlForLayer
+            - ecr:BatchGetImage
+            Resource:
+              Ref: EcrRepositoryArn
+          - Effect: Allow
+            Action:
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource:
+            - Fn::GetAtt:
+              - ApiLogs
+              - Arn
+            - Fn::GetAtt:
+              - WorkerLogs
+              - Arn
+            - Fn::GetAtt:
+              - MigrationLogs
+              - Arn
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  ApplicationTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              aws:SourceAccount:
+                Ref: AWS::AccountId
+            ArnLike:
+              aws:SourceArn:
+                Fn::Sub: arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:*
+      Policies:
+      - PolicyName: ScopedApplicationAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource:
+            - Ref: RuntimeSecretArn
+            - Ref: DatabaseAppSecretArn
+          - Fn::If:
+            - HasSecretsKmsKey
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource:
+                Ref: SecretsKmsKeyArn
+              Condition:
+                StringEquals:
+                  kms:ViaService:
+                    Fn::Sub: secretsmanager.${AWS::Region}.amazonaws.com
+            - Ref: AWS::NoValue
+          - Effect: Allow
+            Action:
+            - kms:GetPublicKey
+            - kms:Sign
+            - kms:DescribeKey
+            - kms:ListResourceTags
+            Resource:
+              Fn::Sub: arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: suica-pay
+          - Effect: Allow
+            Action:
+            - kms:ListKeys
+            - kms:ListAliases
+            Resource: '*'
+          - Effect: Allow
+            Action: kms:CreateKey
+            Resource: '*'
+            Condition:
+              StringEquals:
+                aws:RequestTag/Project: suica-pay
+                kms:KeySpec: ECC_SECG_P256K1
+                kms:KeyUsage: SIGN_VERIFY
+              ForAllValues:StringEquals:
+                aws:TagKeys:
+                - Project
+                - WalletRef
+          - Effect: Allow
+            Action: kms:TagResource
+            Resource:
+              Fn::Sub: arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*
+            Condition:
+              StringEquals:
+                aws:RequestTag/Project: suica-pay
+              ForAllValues:StringEquals:
+                aws:TagKeys:
+                - Project
+                - WalletRef
+          - Effect: Allow
+            Action: kms:CreateAlias
+            Resource:
+              Fn::Sub: arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/suica-pay/*
+          - Effect: Allow
+            Action: kms:CreateAlias
+            Resource:
+              Fn::Sub: arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: suica-pay
+          - Effect: Deny
+            Action: kms:TagResource
+            Resource:
+              Fn::Sub: arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*
+            Condition:
+              'Null':
+                aws:ResourceTag/Project: 'false'
+              StringNotEquals:
+                aws:ResourceTag/Project: suica-pay
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  MigrationTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              aws:SourceAccount:
+                Ref: AWS::AccountId
+            ArnLike:
+              aws:SourceArn:
+                Fn::Sub: arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:*
+      Policies:
+      - PolicyName: ScopedApplicationAccess
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource:
+            - Ref: RuntimeSecretArn
+            - Ref: DatabaseAppSecretArn
+            - Fn::GetAtt:
+              - Database
+              - MasterUserSecret.SecretArn
+          - Fn::If:
+            - HasSecretsKmsKey
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource:
+                Ref: SecretsKmsKeyArn
+              Condition:
+                StringEquals:
+                  kms:ViaService:
+                    Fn::Sub: secretsmanager.${AWS::Region}.amazonaws.com
+            - Ref: AWS::NoValue
+          - Fn::If:
+            - HasMigrationBucket
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource:
+                Fn::Sub: arn:${AWS::Partition}:s3:::${MigrationBucketName}
+              Condition:
+                StringLike:
+                  s3:prefix:
+                  - Fn::Sub: ${MigrationObjectPrefix}*
+            - Ref: AWS::NoValue
+          - Fn::If:
+            - HasMigrationBucket
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                Fn::Sub: arn:${AWS::Partition}:s3:::${MigrationBucketName}/${MigrationObjectPrefix}*
+            - Ref: AWS::NoValue
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName:
+        Fn::Sub: ${AWS::StackName}
+      CapacityProviders:
+      - FARGATE
+      DefaultCapacityProviderStrategy:
+      - CapacityProvider: FARGATE
+        Weight: 1
+        Base: 0
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  ApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family:
+        Fn::Sub: ${AWS::StackName}-api
+      Cpu:
+        Ref: TaskCpu
+      Memory:
+        Ref: TaskMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn:
+        Fn::GetAtt:
+        - TaskExecutionRole
+        - Arn
+      TaskRoleArn:
+        Fn::GetAtt:
+        - ApplicationTaskRole
+        - Arn
+      ContainerDefinitions:
+      - Name: api
+        Image:
+          Ref: ImageUri
+        Essential: true
+        WorkingDirectory: /app/apps/api
+        Command:
+        - api
+        Environment:
+        - Name: NODE_ENV
+          Value: production
+        - Name: HOST
+          Value: 0.0.0.0
+        - Name: PORT
+          Value: '3001'
+        - Name: TRUST_PROXY_HOPS
+          Value: '2'
+        - Name: AWS_REGION
+          Value:
+            Ref: AWS::Region
+        - Name: RUNTIME_SECRET_ARN
+          Value:
+            Ref: RuntimeSecretArn
+        - Name: DATABASE_SECRET_ARN
+          Value:
+            Ref: DatabaseAppSecretArn
+        - Name: DATABASE_HOST
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Address
+        - Name: DATABASE_PORT
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Port
+        - Name: DATABASE_NAME
+          Value:
+            Ref: DatabaseName
+        - Name: DATABASE_SSL_CA_FILE
+          Value: /app/certs/global-bundle.pem
+        - Name: TOKEN_NAME
+          Value:
+            Ref: TokenDisplayName
+        - Name: TOKEN_SYMBOL
+          Value:
+            Ref: TokenDisplaySymbol
+        - Name: TOKEN_ONCHAIN_SYMBOL
+          Value:
+            Ref: TokenOnchainSymbol
+        - Name: TEST_FUNDING_ENABLED
+          Value:
+            Ref: TestFundingEnabled
+        - Name: TEST_FUNDING_DAILY_LIMIT
+          Value:
+            Fn::Sub: ${TestFundingDailyLimit}
+        - Name: LOYALTY_PAYMENT_ADDRESS
+          Value:
+            Ref: LoyaltyPaymentAddress
+        - Name: LOYALTY_PAYMENT_CONTRACT
+          Value:
+            Ref: LoyaltyPaymentContract
+        - Name: COLLECTIBLE_PAYMENT_ADDRESS
+          Value:
+            Ref: CollectiblePaymentAddress
+        - Name: COLLECTIBLE_PAYMENT_CONTRACT
+          Value:
+            Ref: CollectiblePaymentContract
+        - Name: COLLECTIBLE_ARTWORK_BASE_URL
+          Value:
+            Ref: CollectibleArtworkBaseUrl
+        StopTimeout: 120
+        LinuxParameters:
+          InitProcessEnabled: true
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: ApiLogs
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: api
+        PortMappings:
+        - ContainerPort: 3001
+          Protocol: tcp
+        HealthCheck:
+          Command:
+          - CMD
+          - node
+          - -e
+          - const h=require('node:http');const q=h.get('http://127.0.0.1:3001/health/live',r=>{r.resume();process.exit(r.statusCode===200?0:1)});q.on('error',()=>process.exit(1));q.setTimeout(4000,()=>{q.destroy();process.exit(1)});
+          Interval: 30
+          Timeout: 5
+          Retries: 3
+          StartPeriod: 120
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  WorkerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family:
+        Fn::Sub: ${AWS::StackName}-worker
+      Cpu:
+        Ref: TaskCpu
+      Memory:
+        Ref: TaskMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn:
+        Fn::GetAtt:
+        - TaskExecutionRole
+        - Arn
+      TaskRoleArn:
+        Fn::GetAtt:
+        - ApplicationTaskRole
+        - Arn
+      ContainerDefinitions:
+      - Name: worker
+        Image:
+          Ref: ImageUri
+        Essential: true
+        WorkingDirectory: /app/apps/api
+        Command:
+        - worker
+        Environment:
+        - Name: NODE_ENV
+          Value: production
+        - Name: HOST
+          Value: 0.0.0.0
+        - Name: PORT
+          Value: '3001'
+        - Name: TRUST_PROXY_HOPS
+          Value: '2'
+        - Name: AWS_REGION
+          Value:
+            Ref: AWS::Region
+        - Name: RUNTIME_SECRET_ARN
+          Value:
+            Ref: RuntimeSecretArn
+        - Name: DATABASE_SECRET_ARN
+          Value:
+            Ref: DatabaseAppSecretArn
+        - Name: DATABASE_HOST
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Address
+        - Name: DATABASE_PORT
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Port
+        - Name: DATABASE_NAME
+          Value:
+            Ref: DatabaseName
+        - Name: DATABASE_SSL_CA_FILE
+          Value: /app/certs/global-bundle.pem
+        - Name: TOKEN_NAME
+          Value:
+            Ref: TokenDisplayName
+        - Name: TOKEN_SYMBOL
+          Value:
+            Ref: TokenDisplaySymbol
+        - Name: TOKEN_ONCHAIN_SYMBOL
+          Value:
+            Ref: TokenOnchainSymbol
+        - Name: TEST_FUNDING_ENABLED
+          Value:
+            Ref: TestFundingEnabled
+        - Name: TEST_FUNDING_DAILY_LIMIT
+          Value:
+            Fn::Sub: ${TestFundingDailyLimit}
+        - Name: LOYALTY_PAYMENT_ADDRESS
+          Value:
+            Ref: LoyaltyPaymentAddress
+        - Name: LOYALTY_PAYMENT_CONTRACT
+          Value:
+            Ref: LoyaltyPaymentContract
+        - Name: COLLECTIBLE_PAYMENT_ADDRESS
+          Value:
+            Ref: CollectiblePaymentAddress
+        - Name: COLLECTIBLE_PAYMENT_CONTRACT
+          Value:
+            Ref: CollectiblePaymentContract
+        - Name: COLLECTIBLE_ARTWORK_BASE_URL
+          Value:
+            Ref: CollectibleArtworkBaseUrl
+        StopTimeout: 120
+        LinuxParameters:
+          InitProcessEnabled: true
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: WorkerLogs
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: worker
+        HealthCheck:
+          Command:
+          - CMD
+          - node
+          - dist/healthcheck.js
+          - worker
+          Interval: 30
+          Timeout: 5
+          Retries: 3
+          StartPeriod: 120
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  MigrationTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family:
+        Fn::Sub: ${AWS::StackName}-migrate
+      Cpu:
+        Ref: TaskCpu
+      Memory:
+        Ref: TaskMemory
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn:
+        Fn::GetAtt:
+        - TaskExecutionRole
+        - Arn
+      TaskRoleArn:
+        Fn::GetAtt:
+        - MigrationTaskRole
+        - Arn
+      ContainerDefinitions:
+      - Name: migrate
+        Image:
+          Ref: ImageUri
+        Essential: true
+        WorkingDirectory: /app/apps/api
+        Command:
+        - migrate
+        Environment:
+        - Name: NODE_ENV
+          Value: production
+        - Name: HOST
+          Value: 0.0.0.0
+        - Name: PORT
+          Value: '3001'
+        - Name: TRUST_PROXY_HOPS
+          Value: '2'
+        - Name: AWS_REGION
+          Value:
+            Ref: AWS::Region
+        - Name: RUNTIME_SECRET_ARN
+          Value:
+            Ref: RuntimeSecretArn
+        - Name: DATABASE_SECRET_ARN
+          Value:
+            Ref: DatabaseAppSecretArn
+        - Name: DATABASE_HOST
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Address
+        - Name: DATABASE_PORT
+          Value:
+            Fn::GetAtt:
+            - Database
+            - Endpoint.Port
+        - Name: DATABASE_NAME
+          Value:
+            Ref: DatabaseName
+        - Name: DATABASE_SSL_CA_FILE
+          Value: /app/certs/global-bundle.pem
+        - Name: TOKEN_NAME
+          Value:
+            Ref: TokenDisplayName
+        - Name: TOKEN_SYMBOL
+          Value:
+            Ref: TokenDisplaySymbol
+        - Name: TOKEN_ONCHAIN_SYMBOL
+          Value:
+            Ref: TokenOnchainSymbol
+        - Name: TEST_FUNDING_ENABLED
+          Value:
+            Ref: TestFundingEnabled
+        - Name: TEST_FUNDING_DAILY_LIMIT
+          Value:
+            Fn::Sub: ${TestFundingDailyLimit}
+        - Name: LOYALTY_PAYMENT_ADDRESS
+          Value:
+            Ref: LoyaltyPaymentAddress
+        - Name: LOYALTY_PAYMENT_CONTRACT
+          Value:
+            Ref: LoyaltyPaymentContract
+        - Name: COLLECTIBLE_PAYMENT_ADDRESS
+          Value:
+            Ref: CollectiblePaymentAddress
+        - Name: COLLECTIBLE_PAYMENT_CONTRACT
+          Value:
+            Ref: CollectiblePaymentContract
+        - Name: COLLECTIBLE_ARTWORK_BASE_URL
+          Value:
+            Ref: CollectibleArtworkBaseUrl
+        StopTimeout: 120
+        LinuxParameters:
+          InitProcessEnabled: true
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: MigrationLogs
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: migrate
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Scheme: internal
+      IpAddressType: ipv4
+      SecurityGroups:
+      - Ref: LoadBalancerSecurityGroup
+      Subnets:
+        Ref: PublicSubnetIds
+      LoadBalancerAttributes:
+      - Key: routing.http.drop_invalid_header_fields.enabled
+        Value: 'true'
+      - Key: routing.http.desync_mitigation_mode
+        Value: strictest
+      - Key: idle_timeout.timeout_seconds
+        Value: '60'
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  ApiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId:
+        Ref: VpcId
+      Protocol: HTTP
+      Port: 3001
+      TargetType: ip
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /health/ready
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher:
+        HttpCode: '200'
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: '30'
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: ApiTargetGroup
+  ApiService:
+    Type: AWS::ECS::Service
+    DependsOn:
+    - HttpListener
+    - TasksFromLoadBalancer
+    - TasksToPostgres
+    - PostgresFromTasks
+    - LoadBalancerToApi
+    Properties:
+      ServiceName:
+        Fn::Sub: ${AWS::StackName}-api
+      Cluster:
+        Ref: Cluster
+      TaskDefinition:
+        Ref: ApiTaskDefinition
+      DesiredCount:
+        Ref: ApiDesiredCount
+      LaunchType: FARGATE
+      PlatformVersion: 1.4.0
+      SchedulingStrategy: REPLICA
+      EnableECSManagedTags: true
+      PropagateTags: TASK_DEFINITION
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: TaskSecurityGroup
+          Subnets:
+            Ref: PublicSubnetIds
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+      HealthCheckGracePeriodSeconds: 120
+      LoadBalancers:
+      - ContainerName: api
+        ContainerPort: 3001
+        TargetGroupArn:
+          Ref: ApiTargetGroup
+  WorkerService:
+    Type: AWS::ECS::Service
+    DependsOn:
+    - HttpListener
+    - TasksFromLoadBalancer
+    - TasksToPostgres
+    - PostgresFromTasks
+    - LoadBalancerToApi
+    Properties:
+      ServiceName:
+        Fn::Sub: ${AWS::StackName}-worker
+      Cluster:
+        Ref: Cluster
+      TaskDefinition:
+        Ref: WorkerTaskDefinition
+      DesiredCount:
+        Ref: WorkerDesiredCount
+      LaunchType: FARGATE
+      PlatformVersion: 1.4.0
+      SchedulingStrategy: REPLICA
+      EnableECSManagedTags: true
+      PropagateTags: TASK_DEFINITION
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: TaskSecurityGroup
+          Subnets:
+            Ref: PublicSubnetIds
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      Tags:
+      - Key: Project
+        Value: suica-pay
+      - Key: Stack
+        Value:
+          Ref: AWS::StackName
+  ApiCpuHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Sustained high CPU; visible in CloudWatch with no external notification
+        action.
+      Namespace: AWS/ECS
+      MetricName: CPUUtilization
+      Dimensions:
+      - Name: ClusterName
+        Value:
+          Ref: Cluster
+      - Name: ServiceName
+        Value:
+          Fn::GetAtt:
+          - ApiService
+          - Name
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      ActionsEnabled: false
+  WorkerCpuHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Sustained high CPU; visible in CloudWatch with no external notification
+        action.
+      Namespace: AWS/ECS
+      MetricName: CPUUtilization
+      Dimensions:
+      - Name: ClusterName
+        Value:
+          Ref: Cluster
+      - Name: ServiceName
+        Value:
+          Fn::GetAtt:
+          - WorkerService
+          - Name
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      ActionsEnabled: false
+  ApiUnhealthyTargets:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: API targets failing real DB readiness.
+      Namespace: AWS/ApplicationELB
+      MetricName: UnHealthyHostCount
+      Dimensions:
+      - Name: LoadBalancer
+        Value:
+          Fn::GetAtt:
+          - LoadBalancer
+          - LoadBalancerFullName
+      - Name: TargetGroup
+        Value:
+          Fn::GetAtt:
+          - ApiTargetGroup
+          - TargetGroupFullName
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      ActionsEnabled: false
+  TaskStoppedRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Record failed task exits only; routine deployments are excluded.
+      EventPattern:
+        source:
+        - aws.ecs
+        detail-type:
+        - ECS Task State Change
+        detail:
+          clusterArn:
+          - Fn::GetAtt:
+            - Cluster
+            - Arn
+          lastStatus:
+          - STOPPED
+          $or:
+          - stopCode:
+            - TaskFailedToStart
+          - stopCode:
+            - EssentialContainerExited
+            containers:
+              exitCode:
+              - anything-but: 0
+      Targets:
+      - Id: TaskFailureLog
+        Arn:
+          Fn::Sub: arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${TaskEventLogs}
+  TaskEventLogPolicy:
+    Type: AWS::Logs::ResourcePolicy
+    Properties:
+      PolicyName:
+        Fn::Sub: ${AWS::StackName}-task-events
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+            - delivery.logs.amazonaws.com
+          Action:
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+            Fn::GetAtt:
+            - TaskEventLogs
+            - Arn
+          Condition:
+            ArnEquals:
+              aws:SourceArn:
+                Fn::GetAtt:
+                - TaskStoppedRule
+                - Arn
+  TaskFailureMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName:
+        Ref: TaskEventLogs
+      FilterPattern: ''
+      MetricTransformations:
+      - MetricNamespace:
+          Fn::Sub: SuicaPay/${AWS::StackName}
+        MetricName: UnexpectedTaskStops
+        MetricValue: '1'
+        DefaultValue: 0
+  UnexpectedTaskStopsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Essential container exits or task start failures; investigate ECS stopped
+        reason and logs.
+      Namespace:
+        Fn::Sub: SuicaPay/${AWS::StackName}
+      MetricName: UnexpectedTaskStops
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      ActionsEnabled: false
+Outputs:
+  ClusterName:
+    Value:
+      Ref: Cluster
+  ClusterArn:
+    Value:
+      Fn::GetAtt:
+      - Cluster
+      - Arn
+  ApiServiceName:
+    Value:
+      Fn::GetAtt:
+      - ApiService
+      - Name
+  ApiServiceArn:
+    Value:
+      Ref: ApiService
+  WorkerServiceName:
+    Value:
+      Fn::GetAtt:
+      - WorkerService
+      - Name
+  WorkerServiceArn:
+    Value:
+      Ref: WorkerService
+  ApiTaskDefinitionArn:
+    Value:
+      Ref: ApiTaskDefinition
+  WorkerTaskDefinitionArn:
+    Value:
+      Ref: WorkerTaskDefinition
+  MigrationTaskDefinitionArn:
+    Value:
+      Ref: MigrationTaskDefinition
+  MigrationTaskRoleArn:
+    Value:
+      Fn::GetAtt:
+      - MigrationTaskRole
+      - Arn
+  ApplicationTaskRoleArn:
+    Value:
+      Fn::GetAtt:
+      - ApplicationTaskRole
+      - Arn
+  ExecutionRoleArn:
+    Value:
+      Fn::GetAtt:
+      - TaskExecutionRole
+      - Arn
+  AlbDnsName:
+    Value:
+      Fn::GetAtt:
+      - LoadBalancer
+      - DNSName
+  InternalApiEndpoint:
+    Value:
+      Fn::Sub: http://${LoadBalancer.DNSName}
+  DatabaseEndpoint:
+    Value:
+      Fn::GetAtt:
+      - Database
+      - Endpoint.Address
+  DatabasePort:
+    Value:
+      Fn::GetAtt:
+      - Database
+      - Endpoint.Port
+  DatabaseInstanceId:
+    Value:
+      Ref: Database
+  DatabaseMasterSecretArn:
+    Value:
+      Fn::GetAtt:
+      - Database
+      - MasterUserSecret.SecretArn
+  DatabaseAppSecretArn:
+    Value:
+      Ref: DatabaseAppSecretArn
+  EdgeLambdaSecurityGroupId:
+    Value:
+      Ref: EdgeLambdaSecurityGroup
+  LoadBalancerSecurityGroupId:
+    Value:
+      Ref: LoadBalancerSecurityGroup
+  TaskSecurityGroupId:
+    Value:
+      Ref: TaskSecurityGroup
+  DatabaseSecurityGroupId:
+    Value:
+      Ref: DatabaseSecurityGroup
+  ApiTargetGroupArn:
+    Value:
+      Ref: ApiTargetGroup
