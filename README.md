@@ -6,7 +6,7 @@ IC Pay links a physical Suica to a World-verified crypto wallet so customers can
 
 ## 2️⃣ How we used MultiBaas and which network we deployed on
 
-**Deployed network: Ethereum Sepolia — chain ID `11155111`.**
+**Deployed network: Ethereum Sepolia - chain ID `11155111`.**
 
 MultiBaas connects our TypeScript backend to the token and payment contracts. The native SwiftUI app reads the card through Core NFC, the backend authorizes the payment against the customer's spending permission, AWS KMS signs it, and MultiBaas submits it and supplies the chain data used to confirm settlement.
 
@@ -34,7 +34,7 @@ World verifies account enrollment, card linking/replacement, and returning-user 
 
 ## 3️⃣ A brief intro to our team and social handles
 
-We are the team behind IC Pay, building a tap-to-pay experience that connects familiar physical IC cards with crypto payments.
+We are the team behind IC Pay, building a tap to pay experience that connects familiar physical IC cards with crypto payments.
 
 - **Devesh** — [@deveshtwt_ on X](https://x.com/deveshtwt_).
 - **Akash** - [@akashbtwts on X](https://x.com/akashbtwts_)
